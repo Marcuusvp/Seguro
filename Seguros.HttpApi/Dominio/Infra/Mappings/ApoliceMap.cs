@@ -15,8 +15,8 @@ namespace Seguros.HttpApi.Dominio.Infra.Mappings
 
             // Relacionamento com Proprietario
             apolice.HasOne(a => a.Proprietario)
-                   .WithMany()
-                   .HasForeignKey("ProprietarioCpf")
+                   .WithMany(p => p.Apolices)
+                   .HasForeignKey(a => a.ProprietarioId)
                    .IsRequired();
 
             // Propriedades Possuídas (Owned Types)
@@ -59,9 +59,11 @@ namespace Seguros.HttpApi.Dominio.Infra.Mappings
 
             // Relacionamento com Condutores
             apolice.HasMany(a => a.Condutores)
-                   .WithOne()
-                   .HasForeignKey("ApoliceId")
-                   .IsRequired();
+                  .WithMany(c => c.Apolices)
+                  .UsingEntity<Dictionary<string, object>>(
+                      "ApoliceCondutor",
+                      j => j.HasOne<Condutor>().WithMany().HasForeignKey("CondutorId"),
+                      j => j.HasOne<Apolice>().WithMany().HasForeignKey("ApoliceId"));
         }
     }
 }

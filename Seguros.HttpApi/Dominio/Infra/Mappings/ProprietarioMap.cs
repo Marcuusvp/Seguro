@@ -9,7 +9,10 @@ namespace Seguros.HttpApi.Dominio.Infra.Mappings
         public void Configure(EntityTypeBuilder<Proprietario> proprietario)
         {
             proprietario.ToTable("Proprietarios");
-            proprietario.HasKey(p => p.Cpf);
+            proprietario.HasKey(p => p.Id);
+
+            proprietario.Property(p => p.Id)
+                        .ValueGeneratedNever();
 
             proprietario.Property(p => p.Cpf)
                         .HasColumnType("varchar(11)")
@@ -37,6 +40,11 @@ namespace Seguros.HttpApi.Dominio.Infra.Mappings
                         .HasColumnType("varchar(100)")
                         .IsRequired();
             });
+
+            // Configuração do relacionamento um-para-muitos com Apolice
+            proprietario.HasMany(p => p.Apolices)
+                        .WithOne(a => a.Proprietario)
+                        .HasForeignKey(a => a.ProprietarioId);
         }
     }
 }

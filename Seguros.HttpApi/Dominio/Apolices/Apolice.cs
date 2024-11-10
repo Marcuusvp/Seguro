@@ -7,6 +7,7 @@ public sealed class Apolice
     private Apolice() { }
 
     public Guid Id { get; }
+    public Guid ProprietarioId { get; private set; }
     public Veiculo Veiculo { get; }
     public Proprietario Proprietario { get; }
     public List<Condutor> Condutores { get; }
@@ -16,6 +17,7 @@ public sealed class Apolice
     private Apolice(Veiculo veiculo, Proprietario proprietario, List<Condutor> condutores,  Endereco endereco, Cobertura cobertura)
     {
         Id = new Guid();
+        ProprietarioId = proprietario.Id;
         Veiculo = veiculo;
         Proprietario = proprietario;
         Condutores = condutores;
@@ -25,7 +27,7 @@ public sealed class Apolice
 
     public static Result<Apolice> Criar(Veiculo veiculo, Proprietario proprietario, List<Condutor> condutores, Endereco endereco, Cobertura cobertura)
     {
-        return Result.Success(new Apolice(veiculo,  proprietario, condutores, endereco, cobertura));
+        return Result.Success(new Apolice(veiculo, proprietario, condutores, endereco, cobertura));
     }
 }
 

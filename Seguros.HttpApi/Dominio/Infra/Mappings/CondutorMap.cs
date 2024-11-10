@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore;
 using Seguros.HttpApi.Dominio.Condutores;
+using Seguros.HttpApi.Dominio.Apolices;
 
 namespace Seguros.HttpApi.Dominio.Infra.Mappings
 {
@@ -8,7 +9,10 @@ namespace Seguros.HttpApi.Dominio.Infra.Mappings
     {
         public void Configure(EntityTypeBuilder<Condutor> condutor)
         {
-            condutor.HasKey(c => c.Cpf);
+            condutor.HasKey(c => c.Id);
+
+            condutor.Property(c => c.Id)
+                    .ValueGeneratedNever();
 
             condutor.Property(c => c.Cpf)
                     .HasColumnType("varchar(11)")
@@ -17,8 +21,6 @@ namespace Seguros.HttpApi.Dominio.Infra.Mappings
 
             condutor.Property(c => c.DataNascimento)
                     .IsRequired();
-
-            condutor.Property<Guid>("ApoliceId"); // Chave estrangeira sombra
 
             condutor.OwnsOne(c => c.Residencia, endereco =>
             {
@@ -34,6 +36,15 @@ namespace Seguros.HttpApi.Dominio.Infra.Mappings
                         .HasColumnType("varchar(100)")
                         .IsRequired();
             });
+
+            // Configuração do relacionamento muitos-para-muitos com Apolice
+            condutor.HasMany(c => c.Apolices)
+                    .WithMany(a => a.Condutores)
+                    .UsingEntity<Dictionary<string, object>>(
+                        "ApoliceCondutor",
+                        j => j.HasOne<Apolice>().WithMany().HasForeignKey("ApoliceId"),
+                        j => j.HasOne<Condutor>().WithMany().HasForeignKey("CondutorId"));
+
         }
     }
 }
