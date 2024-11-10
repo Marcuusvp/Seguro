@@ -1,4 +1,5 @@
-﻿using Seguros.HttpApi.Dominio.Condutores;
+﻿using Seguros.HttpApi.Dominio.Apolices.Enums;
+using Seguros.HttpApi.Dominio.Condutores;
 using Seguros.HttpApi.Dominio.Proprietarios;
 
 namespace Seguros.HttpApi.Dominio.Apolices;
@@ -13,8 +14,10 @@ public sealed class Apolice
     public List<Condutor> Condutores { get; }
     public Endereco Endereco {  get; }
     public Cobertura Cobertura { get; }
+    public decimal ValorTotal { get; }
+    public EApoliceStatus Status { get; }
 
-    private Apolice(Veiculo veiculo, Proprietario proprietario, List<Condutor> condutores,  Endereco endereco, Cobertura cobertura)
+    private Apolice(Veiculo veiculo, Proprietario proprietario, List<Condutor> condutores,  Endereco endereco, Cobertura cobertura, decimal valorTotal)
     {
         Id = new Guid();
         ProprietarioId = proprietario.Id;
@@ -23,11 +26,13 @@ public sealed class Apolice
         Condutores = condutores;
         Endereco = endereco;
         Cobertura = cobertura;
+        Status = EApoliceStatus.EmAnalise;
+        ValorTotal = valorTotal;
     }
 
-    public static Result<Apolice> Criar(Veiculo veiculo, Proprietario proprietario, List<Condutor> condutores, Endereco endereco, Cobertura cobertura)
+    public static Result<Apolice> Criar(Veiculo veiculo, Proprietario proprietario, List<Condutor> condutores, Endereco endereco, Cobertura cobertura, decimal valorTotal)
     {
-        return Result.Success(new Apolice(veiculo, proprietario, condutores, endereco, cobertura));
+        return Result.Success(new Apolice(veiculo, proprietario, condutores, endereco, cobertura, valorTotal));
     }
 }
 

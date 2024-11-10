@@ -13,6 +13,13 @@ namespace Seguros.HttpApi.Dominio.Infra.Mappings
             apolice.ToTable("Apolices");
             apolice.HasKey(a => a.Id);
 
+            apolice.Property(a => a.ValorTotal)
+               .HasColumnType("decimal(18,2)")
+               .IsRequired();
+
+            apolice.Property(a => a.Status)
+                .IsRequired();
+
             // Relacionamento com Proprietario
             apolice.HasOne(a => a.Proprietario)
                    .WithMany(p => p.Apolices)
@@ -59,11 +66,12 @@ namespace Seguros.HttpApi.Dominio.Infra.Mappings
 
             // Relacionamento com Condutores
             apolice.HasMany(a => a.Condutores)
-                  .WithMany(c => c.Apolices)
-                  .UsingEntity<Dictionary<string, object>>(
-                      "ApoliceCondutor",
-                      j => j.HasOne<Condutor>().WithMany().HasForeignKey("CondutorId"),
-                      j => j.HasOne<Apolice>().WithMany().HasForeignKey("ApoliceId"));
+                .WithMany(c => c.Apolices)
+                .UsingEntity<Dictionary<string, object>>(
+                    "ApoliceCondutor",
+                    j => j.HasOne<Condutor>().WithMany().HasForeignKey("CondutorId"),
+                    j => j.HasOne<Apolice>().WithMany().HasForeignKey("ApoliceId")
+                );            
         }
     }
 }
