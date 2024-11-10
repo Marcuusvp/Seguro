@@ -36,6 +36,6 @@ public sealed class Apolice
     }
 }
 
-public record Veiculo(string Marca, string Modelo, int Ano);
+public record Veiculo(string Marca, string Modelo, string Ano, ETipoVeiculo Tipo);
 public record Endereco(string Uf, string Cidade, string Bairro);
 public record Cobertura(bool RouboFurto, bool Colisao, bool Terceiros, bool Residencial);

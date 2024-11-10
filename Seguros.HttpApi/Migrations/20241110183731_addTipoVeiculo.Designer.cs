@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Seguros.HttpApi.Dominio.Infra;
 
@@ -11,9 +12,11 @@ using Seguros.HttpApi.Dominio.Infra;
 namespace Seguros.HttpApi.Migrations
 {
     [DbContext(typeof(SegurosDbContext))]
-    partial class SegurosDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241110183731_addTipoVeiculo")]
+    partial class addTipoVeiculo
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -177,9 +180,8 @@ namespace Seguros.HttpApi.Migrations
                             b1.Property<Guid>("ApoliceId")
                                 .HasColumnType("uniqueidentifier");
 
-                            b1.Property<string>("Ano")
-                                .IsRequired()
-                                .HasColumnType("varchar(25)");
+                            b1.Property<int>("Ano")
+                                .HasColumnType("int");
 
                             b1.Property<string>("Marca")
                                 .IsRequired()

@@ -1,4 +1,6 @@
-﻿namespace Seguros.HttpApi.Dominio.Apolices.CriarApolice;
+﻿using Seguros.HttpApi.Dominio.Apolices.Enums;
+
+namespace Seguros.HttpApi.Dominio.Apolices.CriarApolice;
 public record CriarApoliceRequest(VeiculoRequest Veiculo,
         ProprietarioRequest Proprietario,
         List<CondutorRequest> Condutores,
@@ -31,7 +33,7 @@ public class CriarApoliceEndpoint : ICarterModule
         .WithDescription("Criar apolice");
     }
 }
-public record VeiculoRequest(string Marca, string Modelo, int Ano);
+public record VeiculoRequest(string Marca, string Modelo, string Ano, ETipoVeiculo Tipo);
 public record ProprietarioRequest(string Cpf, string Nome, DateOnly DataNascimento, EnderecoRequest Residencia);
 public record CondutorRequest(string Cpf, DateOnly DataNascimento, EnderecoRequest Residencia);
 public record EnderecoRequest(string Uf, string Cidade, string Bairro);

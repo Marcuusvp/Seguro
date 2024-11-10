@@ -38,7 +38,11 @@ namespace Seguros.HttpApi.Dominio.Infra.Mappings
                        .IsRequired();
 
                 veiculo.Property(v => v.Ano)
+                       .HasColumnType("varchar(25)")
                        .IsRequired();
+
+                veiculo.Property(v => v.Tipo)
+                    .IsRequired();
             });
 
             apolice.OwnsOne(a => a.Endereco, endereco =>
