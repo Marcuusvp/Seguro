@@ -9,7 +9,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Seguros.HttpApi", "Seguros.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HistoricoCondutor.HttpApi", "HistoricoCondutor.HttpApi\HistoricoCondutor.HttpApi.csproj", "{AB12B31B-B251-4665-BEC5-288C11515403}"
 EndProject
-Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{941847D0-794F-4DCB-9216-A0E0BE2E9525}"
+Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{85913824-A512-4776-A53D-B207C6913BF4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -29,10 +29,10 @@ Global
 		{AB12B31B-B251-4665-BEC5-288C11515403}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AB12B31B-B251-4665-BEC5-288C11515403}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AB12B31B-B251-4665-BEC5-288C11515403}.Release|Any CPU.Build.0 = Release|Any CPU
-		{941847D0-794F-4DCB-9216-A0E0BE2E9525}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{941847D0-794F-4DCB-9216-A0E0BE2E9525}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{941847D0-794F-4DCB-9216-A0E0BE2E9525}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{941847D0-794F-4DCB-9216-A0E0BE2E9525}.Release|Any CPU.Build.0 = Release|Any CPU
+		{85913824-A512-4776-A53D-B207C6913BF4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{85913824-A512-4776-A53D-B207C6913BF4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{85913824-A512-4776-A53D-B207C6913BF4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{85913824-A512-4776-A53D-B207C6913BF4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

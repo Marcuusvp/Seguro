@@ -1,0 +1,33 @@
+FROM mcr.microsoft.com/mssql/server:2019-latest
+
+ENV SA_PASSWORD=SenhaSegura@123
+ENV ACCEPT_EULA=Y
+
+# Alterna para o usuário root para instalar dependências
+USER root
+
+# Instala os pacotes necessários e o mssql-tools
+RUN apt-get update && apt-get install -y curl apt-transport-https gnupg && \
+    curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - && \
+    curl https://packages.microsoft.com/config/ubuntu/20.04/prod.list > /etc/apt/sources.list.d/mssql-tools.list && \
+    apt-get update && \
+    ACCEPT_EULA=Y apt-get install -y mssql-tools unixodbc-dev && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Adiciona o mssql-tools ao PATH
+ENV PATH="$PATH:/opt/mssql-tools/bin"
+
+# Copia os scripts para o container
+COPY ./sql-scripts /var/opt/mssql/scripts
+
+# Concede permissões de execução ao script de entrada
+RUN chmod +x /var/opt/mssql/scripts/entrypoint.sh
+
+# Retorna ao usuário mssql
+USER mssql
+
+# Define o diretório de trabalho
+WORKDIR /var/opt/mssql/scripts
+
+# Executa o script de entrada
+ENTRYPOINT ["./entrypoint.sh"]

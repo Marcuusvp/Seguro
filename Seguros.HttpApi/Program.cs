@@ -1,3 +1,5 @@
+using Seguros.HttpApi.Dominio.RiscoPorLocalidade;
+
 var builder = WebApplication.CreateBuilder(args);
 var assembly = typeof(Program).Assembly;
 
@@ -15,6 +17,10 @@ builder.Services.AddDbContext<SegurosDbContext>(options =>
 builder.Services.AddScoped<ApoliceRepository>();
 builder.Services.AddScoped<CondutorRepository>();
 builder.Services.AddScoped<ProprietarioRepository>();
+builder.Services.AddScoped<RegrasRepository>();
+builder.Services.AddScoped<CalculoRiscoService>();
+builder.Services.AddScoped<CalculoValorSeguroService>();
+builder.Services.AddScoped<RiscoPorLocalidadeRepository>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IHistoricoAcidentesService, HistoricoAcidentesService>();
 builder.Services.AddHttpClient<IFipeService, FipeService>(client =>
@@ -23,7 +29,7 @@ builder.Services.AddHttpClient<IFipeService, FipeService>(client =>
 });
 builder.Services.AddHttpClient<IHistoricoAcidentesService, HistoricoAcidentesService>(client =>
 {
-    client.BaseAddress = new Uri("http://localhost:5000");
+    client.BaseAddress = new Uri("http://localhost:8080");
 });
 
 builder.Services.AddSwaggerGen();

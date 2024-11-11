@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Seguros.HttpApi.Dominio.Infra;
 
@@ -11,9 +12,11 @@ using Seguros.HttpApi.Dominio.Infra;
 namespace Seguros.HttpApi.Migrations
 {
     [DbContext(typeof(SegurosDbContext))]
-    partial class SegurosDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241111021154_adicionaregrastable")]
+    partial class adicionaregrastable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -70,21 +73,19 @@ namespace Seguros.HttpApi.Migrations
 
                     b.Property<string>("ConteudoJson")
                         .IsRequired()
-                        .HasColumnType("varchar(max)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Nome")
                         .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("varchar(100)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Tipo")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("varchar(100)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("RegrasCalculo", (string)null);
+                    b.ToTable("RegrasCalculo");
                 });
 
             modelBuilder.Entity("Seguros.HttpApi.Dominio.Condutores.Condutor", b =>
@@ -125,40 +126,6 @@ namespace Seguros.HttpApi.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Proprietarios", (string)null);
-                });
-
-            modelBuilder.Entity("Seguros.HttpApi.Dominio.RiscoPorLocalidade.RiscoLocalidade", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Bairro")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("varchar(100)");
-
-                    b.Property<string>("Cidade")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("varchar(100)");
-
-                    b.Property<string>("NivelRisco")
-                        .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("varchar(15)");
-
-                    b.Property<string>("UF")
-                        .IsRequired()
-                        .HasMaxLength(2)
-                        .HasColumnType("varchar(2)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UF", "Cidade", "Bairro")
-                        .IsUnique();
-
-                    b.ToTable("RiscoPorLocalidade", (string)null);
                 });
 
             modelBuilder.Entity("ApoliceCondutor", b =>

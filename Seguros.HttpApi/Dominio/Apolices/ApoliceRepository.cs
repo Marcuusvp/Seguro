@@ -1,6 +1,4 @@
-﻿using Seguros.HttpApi.Dominio.Infra;
-
-namespace Seguros.HttpApi.Dominio.Apolices
+﻿namespace Seguros.HttpApi.Dominio.Apolices
 {
     public sealed class ApoliceRepository(SegurosDbContext dbContext)
     {

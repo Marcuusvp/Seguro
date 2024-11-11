@@ -1,0 +1,38 @@
+services:
+  sql-server-db:
+    container_name: sql-server-db
+    build:
+      context: .
+      dockerfile: Dockerfile.mssql
+    ports:
+      - "1433:1433"
+    environment:
+      SA_PASSWORD: "SenhaSegura@123"
+      ACCEPT_EULA: "Y"
+    healthcheck:
+        test: ["CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P SenhaSegura@123 -Q \"IF DB_ID('HistoricoDb') IS NOT NULL SELECT 1 ELSE SELECT 0\" | grep -q 1"]
+        interval: 10s
+        timeout: 5s
+        retries: 3
+        start_period: 30s
+    networks:
+      - seguros-network
+
+  historicocondutor.httpapi:
+    build:
+      context: .
+      dockerfile: HistoricoCondutor.HttpApi/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://0.0.0.0:80
+      - ConnectionStrings__DefaultConnection=Server=sql-server-db;Database=HistoricoDb;User Id=sa;Password=SenhaSegura@123;Trusted_Connection=False;TrustServerCertificate=True;MultipleActiveResultSets=true;
+    ports:
+      - "8080:80"
+    depends_on:
+      sql-server-db:
+        condition: service_healthy
+    networks:
+      - seguros-network
+
+networks:
+  seguros-network:

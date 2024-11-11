@@ -1,8 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Seguros.HttpApi.Dominio.Apolices;
-using Seguros.HttpApi.Dominio.Condutores;
-using Seguros.HttpApi.Dominio.Proprietarios;
+﻿using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Seguros.HttpApi.Dominio.Infra.Mappings
 {

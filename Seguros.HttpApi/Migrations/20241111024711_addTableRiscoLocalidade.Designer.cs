@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Seguros.HttpApi.Dominio.Infra;
 
@@ -11,9 +12,11 @@ using Seguros.HttpApi.Dominio.Infra;
 namespace Seguros.HttpApi.Migrations
 {
     [DbContext(typeof(SegurosDbContext))]
-    partial class SegurosDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241111024711_addTableRiscoLocalidade")]
+    partial class addTableRiscoLocalidade
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

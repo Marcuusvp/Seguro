@@ -1,6 +1,4 @@
 ﻿using Seguros.HttpApi.Dominio.Apolices.Enums;
-using Seguros.HttpApi.Dominio.Condutores;
-using Seguros.HttpApi.Dominio.Proprietarios;
 
 namespace Seguros.HttpApi.Dominio.Apolices;
 public sealed class Apolice

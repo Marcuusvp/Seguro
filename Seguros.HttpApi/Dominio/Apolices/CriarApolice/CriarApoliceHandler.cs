@@ -1,11 +1,9 @@
 ﻿
 using Seguros.HttpApi.Dominio.Apolices.EntityFactory;
 using Seguros.HttpApi.Dominio.Apolices.Enums;
-using Seguros.HttpApi.Dominio.Apolices.Servicos;
-using Seguros.HttpApi.Dominio.Apolices.Servicos.Interfaces;
+using Seguros.HttpApi.Dominio.Apolices.Servicos.Auxiliares;
 using Seguros.HttpApi.Dominio.Apolices.Validators;
-using Seguros.HttpApi.Dominio.Condutores;
-using Seguros.HttpApi.Dominio.Infra.Interfaces;
+using Seguros.HttpApi.Dominio.RiscoPorLocalidade;
 
 namespace Seguros.HttpApi.Dominio.Apolices.CriarApolice;
 public record CriarApoliceCommand(VeiculoApolice Veiculo,
@@ -45,7 +43,10 @@ internal class CriarApoliceHandler(ApoliceRepository _apoliceRepository
     , IFipeService _fipeService
     , ProprietarioRepository _proprietarioRepository
     , CondutorRepository _condutorRepository
-    , IHistoricoAcidentesService _historicoAcidentesService) : ICommandHandler<CriarApoliceCommand, Result<CriarApoliceResult>>
+    , IHistoricoAcidentesService _historicoAcidentesService
+    , RiscoPorLocalidadeRepository _riscoPorLocalidadeRepository
+    , CalculoRiscoService _calculoRisco
+    , CalculoValorSeguroService _calculoValor) : ICommandHandler<CriarApoliceCommand, Result<CriarApoliceResult>>
 {
     public async Task<Result<CriarApoliceResult>> Handle(CriarApoliceCommand request, CancellationToken cancellationToken)
     {
@@ -121,15 +122,18 @@ internal class CriarApoliceHandler(ApoliceRepository _apoliceRepository
             }
             condutoresSegurados.Add(condutor.Value);
         }
-        // Exemplo de uso:
-        var condutorCpf = request.Proprietario.Cpf;
-        var acidentesResult = await _historicoAcidentesService.ObterQuantidadeAcidentesAsync(condutorCpf, cancellationToken);
 
-        if (acidentesResult.IsFailure)
-            return Result.Failure<CriarApoliceResult>(acidentesResult.Error);
-
-        int quantidadeAcidentes = acidentesResult.Value;
-
+        int riscoApolice = 0;
+        foreach (var condutor in condutoresSegurados)
+        {      
+            var acidentesResult = await _historicoAcidentesService.ObterQuantidadeAcidentesAsync(condutor.Cpf, cancellationToken);
+            if (acidentesResult.IsFailure)
+                return Result.Failure<CriarApoliceResult>(acidentesResult.Error);
+            var acidentes = acidentesResult.Value;
+            var riscoLocalidade = await _riscoPorLocalidadeRepository.ObterNivelRiscoLocalidadeAsync(condutor.Residencia.Uf, condutor.Residencia.Cidade, condutor.Residencia.Bairro);
+            var riscoCondutor = await _calculoRisco.CalcularNivelRiscoAsync(condutor, acidentes, riscoLocalidade);
+            riscoApolice += riscoCondutor;
+        }
 
         // Criar o endereço
         var endereco = new Endereco(
@@ -144,6 +148,9 @@ internal class CriarApoliceHandler(ApoliceRepository _apoliceRepository
             request.Cobertura.Terceiros,
             request.Cobertura.Residencial);
 
+        var coberturasDesejadas = ListaCoberturasSeleciondas.GerarListaDeCoberturas(cobertura);
+        var valorApolice = await _calculoValor.CalcularValorSeguroAsync(obterValorVeiculo.Value, riscoApolice, coberturasDesejadas);
+
         // Criar a apólice
         var apoliceResult = Apolice.Criar(
             veiculo,
@@ -151,7 +158,7 @@ internal class CriarApoliceHandler(ApoliceRepository _apoliceRepository
             condutoresSegurados,
             endereco,
             cobertura,
-            obterValorVeiculo.Value);
+            valorApolice);
 
         if (apoliceResult.IsFailure)
             return Result.Failure<CriarApoliceResult>(apoliceResult.Error);
