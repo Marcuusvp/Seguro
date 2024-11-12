@@ -16,3 +16,8 @@ global using Seguros.HttpApi.Dominio.Infra;
 global using Seguros.HttpApi.Dominio.Infra.Interfaces;
 global using Seguros.HttpApi.Dominio.Condutores;
 global using Seguros.HttpApi.Dominio.Proprietarios;
+global using Seguros.HttpApi.Dominio.Apolices.EntityFactory;
+global using Seguros.HttpApi.Dominio.Apolices.Enums;
+global using Seguros.HttpApi.Dominio.Apolices.Servicos.Auxiliares;
+global using Seguros.HttpApi.Dominio.Apolices.Validators;
+global using Seguros.HttpApi.Dominio.RiscoPorLocalidade;

@@ -1,10 +1,4 @@
 ﻿
-using Seguros.HttpApi.Dominio.Apolices.EntityFactory;
-using Seguros.HttpApi.Dominio.Apolices.Enums;
-using Seguros.HttpApi.Dominio.Apolices.Servicos.Auxiliares;
-using Seguros.HttpApi.Dominio.Apolices.Validators;
-using Seguros.HttpApi.Dominio.RiscoPorLocalidade;
-
 namespace Seguros.HttpApi.Dominio.Apolices.CriarApolice;
 public record CriarApoliceCommand(VeiculoApolice Veiculo,
         ProprietarioApolice Proprietario,

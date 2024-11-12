@@ -13,7 +13,7 @@ public sealed class Apolice
     public Endereco Endereco {  get; }
     public Cobertura Cobertura { get; }
     public decimal ValorTotal { get; }
-    public EApoliceStatus Status { get; }
+    public EApoliceStatus Status { get; private set; }
 
     private Apolice(Veiculo veiculo, Proprietario proprietario, List<Condutor> condutores,  Endereco endereco, Cobertura cobertura, decimal valorTotal)
     {
@@ -31,6 +31,11 @@ public sealed class Apolice
     public static Result<Apolice> Criar(Veiculo veiculo, Proprietario proprietario, List<Condutor> condutores, Endereco endereco, Cobertura cobertura, decimal valorTotal)
     {
         return Result.Success(new Apolice(veiculo, proprietario, condutores, endereco, cobertura, valorTotal));
+    }
+
+    public void AtualizarStatus(EApoliceStatus status)
+    {
+        Status = status;
     }
 }
 

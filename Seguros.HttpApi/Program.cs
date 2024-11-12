@@ -1,5 +1,3 @@
-using Seguros.HttpApi.Dominio.RiscoPorLocalidade;
-
 var builder = WebApplication.CreateBuilder(args);
 var assembly = typeof(Program).Assembly;
 
@@ -23,6 +21,8 @@ builder.Services.AddScoped<CalculoValorSeguroService>();
 builder.Services.AddScoped<RiscoPorLocalidadeRepository>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IHistoricoAcidentesService, HistoricoAcidentesService>();
+builder.Services.AddScoped<GerarApoliceService>();
+
 builder.Services.AddHttpClient<IFipeService, FipeService>(client =>
 {
     client.BaseAddress = new Uri("https://parallelum.com.br/fipe/api/v1/");
