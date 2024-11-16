@@ -1,3 +1,8 @@
+using Seguros.HttpApi.Dominio.WorkFlow;
+using Seguros.HttpApi.Dominio.WorkFlow.WorkflowSteps;
+using WorkflowCore.Interface;
+using WorkflowCore.Services;
+
 var builder = WebApplication.CreateBuilder(args);
 var assembly = typeof(Program).Assembly;
 
@@ -12,6 +17,21 @@ builder.Services.AddValidatorsFromAssembly(assembly);
 
 builder.Services.AddDbContext<SegurosDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Registre as etapas do fluxo de trabalho
+builder.Services.AddTransient<ProprietarioStep>();
+builder.Services.AddTransient<CondutorStep>();
+builder.Services.AddTransient<VeiculoStep>();
+builder.Services.AddTransient<CalcularRiscoStep>();
+builder.Services.AddTransient<EnderecoStep>();
+builder.Services.AddTransient<CalcularValorStep>();
+builder.Services.AddTransient<CriarApoliceStep>();
+
+builder.Services.AddWorkflow(cfg =>
+{
+    cfg.UseSqlServer(builder.Configuration.GetConnectionString("WorkFlowDb"), true, true);
+});
+//Register services
 builder.Services.AddScoped<ApoliceRepository>();
 builder.Services.AddScoped<CondutorRepository>();
 builder.Services.AddScoped<ProprietarioRepository>();
@@ -35,7 +55,30 @@ builder.Services.AddHttpClient<IHistoricoAcidentesService, HistoricoAcidentesSer
 builder.Services.AddSwaggerGen();
 builder.Services.AddExceptionHandler<CustomExceptionHandler>();
 
+
+//BUILD 
 var app = builder.Build();
+// Obter o IWorkflowHost dos serviços
+var workflowHost = app.Services.GetService<IWorkflowHost>();
+
+if (workflowHost != null)
+{
+    // Registrar o fluxo de trabalho
+    workflowHost.RegisterWorkflow<CriarApoliceWorkflow, CriarApoliceWorkflowData>();
+
+    // Iniciar o host do WorkflowCore
+    await workflowHost.StartAsync(new CancellationToken());
+
+    // Opcional: Registrar o evento de parada do aplicativo para parar o WorkflowCore
+    app.Lifetime.ApplicationStopping.Register(() =>
+    {
+        workflowHost.StopAsync(new CancellationToken());
+    });
+}
+else
+{
+    throw new Exception("IWorkflowHost não está registrado nos serviços.");
+}
 
 app.MapCarter();
 

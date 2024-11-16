@@ -1,4 +1,5 @@
 ﻿using Seguros.HttpApi.Dominio.Apolices;
+using System.Text.Json.Serialization;
 
 namespace Seguros.HttpApi.Dominio.Condutores;
 

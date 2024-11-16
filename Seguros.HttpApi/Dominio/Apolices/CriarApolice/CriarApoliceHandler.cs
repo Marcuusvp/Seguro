@@ -1,4 +1,7 @@
 ﻿
+using WorkflowCore.Interface;
+using WorkflowCore.Models;
+
 namespace Seguros.HttpApi.Dominio.Apolices.CriarApolice;
 public record CriarApoliceCommand(VeiculoApolice Veiculo,
         ProprietarioApolice Proprietario,
@@ -32,137 +35,39 @@ public class CreateApoliceCommandValidator : AbstractValidator<CriarApoliceComma
             .SetValidator(new CoberturaApoliceValidator());
     }
 }
-internal class CriarApoliceHandler(ApoliceRepository _apoliceRepository
-    , IUnitOfWork _unitOfWork
-    , IFipeService _fipeService
-    , ProprietarioRepository _proprietarioRepository
-    , CondutorRepository _condutorRepository
-    , IHistoricoAcidentesService _historicoAcidentesService
-    , RiscoPorLocalidadeRepository _riscoPorLocalidadeRepository
-    , CalculoRiscoService _calculoRisco
-    , CalculoValorSeguroService _calculoValor) : ICommandHandler<CriarApoliceCommand, Result<CriarApoliceResult>>
+internal class CriarApoliceHandler(IWorkflowHost _workflowHost) : ICommandHandler<CriarApoliceCommand, Result<CriarApoliceResult>>
 {
     public async Task<Result<CriarApoliceResult>> Handle(CriarApoliceCommand request, CancellationToken cancellationToken)
     {
-        // Criar o veículo
-        var veiculo = new Veiculo(request.Veiculo.Marca, request.Veiculo.Modelo, request.Veiculo.Ano, request.Veiculo.Tipo);
-
-        var obterValorVeiculo = await _fipeService.ObterValorVeiculoAsync(
-            tipoVeiculo: veiculo.Tipo.ToString()
-            ,marca: veiculo.Marca
-            ,modelo: veiculo.Modelo
-            ,ano: veiculo.Ano,
-            cancellationToken);
-
-        // Criar o proprietário
-        var proprietario = await _proprietarioRepository.ObterPorCpfAsync(request.Proprietario.Cpf, cancellationToken);
-
-        if (proprietario == null)
+        var data = new CriarApoliceWorkflowData
         {
-            // Criar novo proprietário
-            var proprietarioResult = request.Proprietario.ToEntity();
+            VeiculoInput = request.Veiculo,
+            ProprietarioInput = request.Proprietario,
+            CondutoresInput = request.Condutores,
+            EnderecoInput = request.Endereco,
+            CoberturaInput = request.Cobertura
+        };
 
-            if (proprietarioResult.IsFailure)
-                return Result.Failure<CriarApoliceResult>(proprietarioResult.Error);
+        string workflowId = await _workflowHost.StartWorkflow("CriarApoliceWorkflow", 1, data);
 
-            proprietario = proprietarioResult.Value;
-            await _proprietarioRepository.AdicionarAsync(proprietario.Value, cancellationToken);
+        // Aguardar a conclusão do fluxo de trabalho
+        var instance = await _workflowHost.PersistenceStore.GetWorkflowInstance(workflowId);
+        while (instance.Status == WorkflowStatus.Runnable || instance.Status == WorkflowStatus.Suspended)
+        {
+            await Task.Delay(500); // Aguarda meio segundo antes de verificar novamente
+            instance = await _workflowHost.PersistenceStore.GetWorkflowInstance(workflowId);
+        }
+
+        if (instance.Status == WorkflowStatus.Complete)
+        {
+            var resultData = instance.Data as CriarApoliceWorkflowData;
+            return Result.Success(new CriarApoliceResult(resultData.ApoliceId));
         }
         else
         {
-            // Atualizar o endereço se necessário
-            var novoEndereco = new Endereco(
-                request.Proprietario.Residencia.Uf,
-                request.Proprietario.Residencia.Cidade,
-                request.Proprietario.Residencia.Bairro);
-
-            if (!proprietario.Value.Residencia.Equals(novoEndereco))
-            {
-                proprietario.Value.AtualizaEndereco(novoEndereco);
-                await _proprietarioRepository.AtualizarAsync(proprietario.Value, cancellationToken);
-            }
+            // Trate casos onde o fluxo não foi concluído com sucesso
+            return Result.Failure<CriarApoliceResult>("O fluxo de trabalho não foi concluído com sucesso.");
         }
-        // 4. Obter ou criar os condutores
-        var condutoresSegurados = new List<Condutor>();
-
-        foreach (var condutorRequest in request.Condutores)
-        {
-            var condutor = await _condutorRepository.ObterPorCpfAsync(condutorRequest.Cpf, cancellationToken);
-
-            if (condutor == null)
-            {
-                // Criar novo condutor
-                var condutorResult = condutorRequest.ToEntity();
-
-                if (condutorResult.IsFailure)
-                    return Result.Failure<CriarApoliceResult>(condutorResult.Error);
-
-                condutor = condutorResult.Value;
-                await _condutorRepository.AdicionarAsync(condutor.Value, cancellationToken);
-            }
-            else
-            {
-                // Atualizar o endereço se necessário
-                var novoEndereco = new Endereco(
-                    condutorRequest.Residencia.Uf,
-                    condutorRequest.Residencia.Cidade,
-                    condutorRequest.Residencia.Bairro);
-
-                if (!condutor.Value.Residencia.Equals(novoEndereco))
-                {
-                    condutor.Value.AtualizarEndereco(novoEndereco);
-                    await _condutorRepository.AtualizarAsync(condutor.Value, cancellationToken);
-                }
-            }
-            condutoresSegurados.Add(condutor.Value);
-        }
-
-        int riscoApolice = 0;
-        foreach (var condutor in condutoresSegurados)
-        {      
-            var acidentesResult = await _historicoAcidentesService.ObterQuantidadeAcidentesAsync(condutor.Cpf, cancellationToken);
-            if (acidentesResult.IsFailure)
-                return Result.Failure<CriarApoliceResult>(acidentesResult.Error);
-            var acidentes = acidentesResult.Value;
-            var riscoLocalidade = await _riscoPorLocalidadeRepository.ObterNivelRiscoLocalidadeAsync(condutor.Residencia.Uf, condutor.Residencia.Cidade, condutor.Residencia.Bairro);
-            var riscoCondutor = await _calculoRisco.CalcularNivelRiscoAsync(condutor, acidentes, riscoLocalidade);
-            riscoApolice += riscoCondutor;
-        }
-
-        // Criar o endereço
-        var endereco = new Endereco(
-            request.Endereco.Uf,
-            request.Endereco.Cidade,
-            request.Endereco.Bairro);
-
-        // Criar a cobertura
-        var cobertura = new Cobertura(
-            request.Cobertura.RouboFurto,
-            request.Cobertura.Colisao,
-            request.Cobertura.Terceiros,
-            request.Cobertura.Residencial);
-
-        var coberturasDesejadas = ListaCoberturasSeleciondas.GerarListaDeCoberturas(cobertura);
-        var valorApolice = await _calculoValor.CalcularValorSeguroAsync(obterValorVeiculo.Value, riscoApolice, coberturasDesejadas);
-
-        // Criar a apólice
-        var apoliceResult = Apolice.Criar(
-            veiculo,
-            proprietario.Value,
-            condutoresSegurados,
-            endereco,
-            cobertura,
-            valorApolice);
-
-        if (apoliceResult.IsFailure)
-            return Result.Failure<CriarApoliceResult>(apoliceResult.Error);
-
-        var apolice = apoliceResult.Value;
-
-        await _apoliceRepository.Adicionar(apolice, cancellationToken);
-        await _unitOfWork.CommitAsync(cancellationToken);
-
-        return Result.Success(new CriarApoliceResult(apolice.Id));
     }
 }
 
