@@ -1,12 +1,13 @@
-﻿using WorkflowCore.Interface;
+﻿using System.Threading;
+using WorkflowCore.Interface;
 using WorkflowCore.Models;
 
 namespace Seguros.HttpApi.Dominio.WorkFlow.WorkflowSteps;
 
-public class ProprietarioStep(ProprietarioRepository _proprietarioRepository) : StepBodyAsync
+public class ProprietarioStep(ProprietarioRepository _proprietarioRepository, IUnitOfWork _unitOfWork) : StepBodyAsync
 {
     public ProprietarioApolice ProprietarioInput { get; set; }
-    public Proprietario Proprietario { get; set; }
+    public Guid ProprietarioId { get; set; }
 
     public override async Task<ExecutionResult> RunAsync(IStepExecutionContext context)
     {
@@ -20,8 +21,9 @@ public class ProprietarioStep(ProprietarioRepository _proprietarioRepository) : 
             if (proprietarioResult.IsFailure)
                 throw new Exception(proprietarioResult.Error);
 
-            Proprietario = proprietarioResult.Value;
-            await _proprietarioRepository.AdicionarAsync(Proprietario, token);
+            var proprietarioCadastro = proprietarioResult.Value;
+            await _proprietarioRepository.AdicionarAsync(proprietarioCadastro, token);
+            ProprietarioId = proprietarioResult.Value.Id;
         }
         else
         {
@@ -36,9 +38,9 @@ public class ProprietarioStep(ProprietarioRepository _proprietarioRepository) : 
                 await _proprietarioRepository.AtualizarAsync(proprietario.Value, token);
             }
 
-            Proprietario = proprietario.Value;
+            ProprietarioId = proprietario.Value.Id;
         }
-
+        await _unitOfWork.CommitAsync(token);
         return ExecutionResult.Next();
     }
 }

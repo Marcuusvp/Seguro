@@ -7,7 +7,7 @@ namespace Seguros.HttpApi.Dominio.Apolices.Servicos;
 
 public class GerarApoliceService(IConfiguration configuration)
 {
-    public byte[] GerarApolice(Apolice apolice)
+    public byte[] GerarApolice(Apolice apolice, Proprietario proprietario)
     {
         string _logoPath = configuration["Paths:LogoPath"];
 
@@ -30,9 +30,9 @@ public class GerarApoliceService(IConfiguration configuration)
                     .Column(column =>
                     {
                         column.Item().Text("Dados do Segurado").FontSize(14).Bold().Underline();
-                        column.Item().Text($"Nome: {apolice.Proprietario.Nome}");
-                        column.Item().Text($"CPF: {apolice.Proprietario.Cpf}");
-                        column.Item().Text($"Endereço: {apolice.Proprietario.Residencia.Uf}, {apolice.Proprietario.Residencia.Cidade}, {apolice.Proprietario.Residencia.Bairro}");
+                        column.Item().Text($"Nome: {proprietario.Nome}");
+                        column.Item().Text($"CPF: {proprietario.Cpf}");
+                        column.Item().Text($"Endereço: {proprietario.Residencia.Uf}, {proprietario.Residencia.Cidade}, {proprietario.Residencia.Bairro}");
 
                         column.Spacing(10);
 

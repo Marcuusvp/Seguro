@@ -25,7 +25,7 @@ builder.Services.AddTransient<VeiculoStep>();
 builder.Services.AddTransient<CalcularRiscoStep>();
 builder.Services.AddTransient<EnderecoStep>();
 builder.Services.AddTransient<CalcularValorStep>();
-builder.Services.AddTransient<CriarApoliceStep>();
+//builder.Services.AddTransient<CriarApoliceStep>();
 
 builder.Services.AddWorkflow(cfg =>
 {

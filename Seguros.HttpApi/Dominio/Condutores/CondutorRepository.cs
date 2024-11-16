@@ -19,5 +19,11 @@ namespace Seguros.HttpApi.Dominio.Condutores
         {
             dbContext.Condutores.Update(condutor);
         }
+
+        public async Task<Maybe<Condutor>> ObterPorIdAsync(Guid id)
+        {
+            return await dbContext.Condutores
+                .FirstOrDefaultAsync(c => c.Id == id);
+        }
     }
 }

@@ -7,8 +7,8 @@ public sealed class Apolice
 
     public Guid Id { get; }
     public Guid ProprietarioId { get; private set; }
-    public Veiculo Veiculo { get; }
     public Proprietario Proprietario { get; }
+    public Veiculo Veiculo { get; }
     public List<Condutor> Condutores { get; }
     public Endereco Endereco {  get; }
     public Cobertura Cobertura { get; }
@@ -19,8 +19,8 @@ public sealed class Apolice
     {
         Id = new Guid();
         ProprietarioId = proprietario.Id;
-        Veiculo = veiculo;
         Proprietario = proprietario;
+        Veiculo = veiculo;
         Condutores = condutores;
         Endereco = endereco;
         Cobertura = cobertura;

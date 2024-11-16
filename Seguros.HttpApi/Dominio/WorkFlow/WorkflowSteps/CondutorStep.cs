@@ -3,10 +3,10 @@ using WorkflowCore.Models;
 
 namespace Seguros.HttpApi.Dominio.WorkFlow.WorkflowSteps;
 
-public class CondutorStep(CondutorRepository _condutorRepository) : StepBodyAsync
+public class CondutorStep(CondutorRepository _condutorRepository, IUnitOfWork _unitOfWork) : StepBodyAsync
 {
     public List<CondutorApolice> CondutoresInput { get; set; }
-    public List<Condutor> Condutores { get; set; } = new();
+    public List<Guid> CondutoresIds { get; set; } = new();
     public override async Task<ExecutionResult> RunAsync(IStepExecutionContext context)
     {
         var token = new CancellationToken();
@@ -38,9 +38,9 @@ public class CondutorStep(CondutorRepository _condutorRepository) : StepBodyAsyn
                 }
             }
 
-            Condutores.Add(condutor.Value);
+            CondutoresIds.Add(condutor.Value.Id);
         }
-
+        await _unitOfWork.CommitAsync(token);
         return ExecutionResult.Next();
     }
 }

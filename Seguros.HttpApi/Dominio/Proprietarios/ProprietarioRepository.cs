@@ -7,6 +7,11 @@
             return await dbContext.Proprietarios
                 .FirstOrDefaultAsync(p => p.Cpf == cpf, cancellationToken);
         }
+        public async Task<Maybe<Proprietario>> ObterPorIdAsync(Guid id, CancellationToken cancellationToken)
+        {
+            return await dbContext.Proprietarios
+                .FirstOrDefaultAsync(p => p.Id == id, cancellationToken);
+        }
         public async Task AdicionarAsync(Proprietario proprietario, CancellationToken cancellationToken)
         {
             await dbContext.Proprietarios.AddAsync(proprietario, cancellationToken);

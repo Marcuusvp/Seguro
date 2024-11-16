@@ -35,7 +35,11 @@ public class CreateApoliceCommandValidator : AbstractValidator<CriarApoliceComma
             .SetValidator(new CoberturaApoliceValidator());
     }
 }
-internal class CriarApoliceHandler(IWorkflowHost _workflowHost) : ICommandHandler<CriarApoliceCommand, Result<CriarApoliceResult>>
+internal class CriarApoliceHandler(IWorkflowHost _workflowHost,
+    CondutorRepository _condutorRepository,
+    IUnitOfWork _unitOfWork,
+    ApoliceRepository _apoliceRepository,
+    ProprietarioRepository _proprietarioRepository) : ICommandHandler<CriarApoliceCommand, Result<CriarApoliceResult>>
 {
     public async Task<Result<CriarApoliceResult>> Handle(CriarApoliceCommand request, CancellationToken cancellationToken)
     {
@@ -61,7 +65,31 @@ internal class CriarApoliceHandler(IWorkflowHost _workflowHost) : ICommandHandle
         if (instance.Status == WorkflowStatus.Complete)
         {
             var resultData = instance.Data as CriarApoliceWorkflowData;
-            return Result.Success(new CriarApoliceResult(resultData.ApoliceId));
+            var condutoresApolice = new List<Condutor>();
+            var proprietario = await _proprietarioRepository.ObterPorIdAsync(resultData.ProprietarioId, cancellationToken);
+            if (proprietario.HasNoValue)
+                return Result.Failure<CriarApoliceResult>("Não foi possível resgatar proprietario");
+            foreach (var condutor in resultData.CondutoresIds)
+            {
+                var condutorResult = await _condutorRepository.ObterPorIdAsync(condutor);
+                if (condutorResult.HasNoValue)
+                    return Result.Failure<CriarApoliceResult>("Não foi possível resgatar condutores");
+                var result = condutorResult.Value;
+                condutoresApolice.Add(result);
+            }
+            var apoliceResult = Apolice.Criar(veiculo: resultData.Veiculo,
+                proprietario: proprietario.Value,
+                condutores: condutoresApolice,
+                endereco: resultData.Endereco,
+                cobertura: resultData.Cobertura,
+                valorTotal: resultData.ValorApolice);
+
+            if (apoliceResult.IsFailure)
+                return Result.Failure<CriarApoliceResult>("Não foi possível criar a apolice.");
+
+            await _apoliceRepository.Adicionar(apoliceResult.Value, cancellationToken);
+            await _unitOfWork.CommitAsync(cancellationToken);
+            return Result.Success(new CriarApoliceResult(apoliceResult.Value.Id));
         }
         else
         {

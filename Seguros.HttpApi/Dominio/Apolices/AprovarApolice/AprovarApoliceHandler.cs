@@ -1,4 +1,6 @@
 ﻿
+using Seguros.HttpApi.Dominio.Proprietarios;
+
 namespace Seguros.HttpApi.Dominio.Apolices.AprovarApolice;
 public record AprovarApoliceCommand(Guid Id) : ICommand<Result<AprovarApoliceResult>>;
 public record AprovarApoliceResult(byte[] Pdf);
@@ -10,7 +12,7 @@ public class AprovarApoliceHandlerValidator : AbstractValidator<AprovarApoliceCo
         RuleFor(x => x.Id).NotEmpty().WithMessage("Informe o Id da apolice desejada");
     }
 }
-internal class AprovarApoliceHandler(ApoliceRepository repository, GerarApoliceService gerarApolice) : ICommandHandler<AprovarApoliceCommand, Result<AprovarApoliceResult>>
+internal class AprovarApoliceHandler(ApoliceRepository repository, GerarApoliceService gerarApolice, ProprietarioRepository proprietarioRepository) : ICommandHandler<AprovarApoliceCommand, Result<AprovarApoliceResult>>
 {
     public async Task<Result<AprovarApoliceResult>> Handle(AprovarApoliceCommand request, CancellationToken cancellationToken)
     {
@@ -21,7 +23,8 @@ internal class AprovarApoliceHandler(ApoliceRepository repository, GerarApoliceS
         var apolice = recuperarApolice.Result.Value;
 
         apolice.AtualizarStatus(EApoliceStatus.Aprovada);
-        var pdf = gerarApolice.GerarApolice(apolice);
+        var propritario = proprietarioRepository.ObterPorIdAsync(apolice.ProprietarioId, cancellationToken);
+        var pdf = gerarApolice.GerarApolice(apolice, propritario.Result.Value);
         if (pdf == null || pdf.Length == 0)
         {
             return Result.Failure<AprovarApoliceResult>("Falha ao gerar o PDF da apólice");

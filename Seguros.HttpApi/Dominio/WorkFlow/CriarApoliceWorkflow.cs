@@ -18,14 +18,14 @@ public class CriarApoliceWorkflow : IWorkflow<CriarApoliceWorkflowData>
 
             .Then<ProprietarioStep>()
                 .Input(step => step.ProprietarioInput, data => data.ProprietarioInput)
-                .Output(data => data.Proprietario, step => step.Proprietario)
+                .Output(data => data.ProprietarioId, step => step.ProprietarioId)
 
             .Then<CondutorStep>()
                 .Input(step => step.CondutoresInput, data => data.CondutoresInput)
-                .Output(data => data.Condutores, step => step.Condutores)
+                .Output(data => data.CondutoresIds, step => step.CondutoresIds)
 
             .Then<CalcularRiscoStep>()
-                .Input(step => step.Condutores, data => data.Condutores)
+                .Input(step => step.CondutoresIds, data => data.CondutoresIds)
                 .Output(data => data.RiscoApolice, step => step.RiscoApolice)
 
             .Then<EnderecoStep>()
@@ -38,17 +38,7 @@ public class CriarApoliceWorkflow : IWorkflow<CriarApoliceWorkflowData>
                 .Input(step => step.ValorVeiculo, data => data.ValorVeiculo)
                 .Input(step => step.RiscoApolice, data => data.RiscoApolice)
                 .Input(step => step.Cobertura, data => data.Cobertura)
-                .Output(data => data.ValorApolice, step => step.ValorApolice)
-
-            .Then<CriarApoliceStep>()
-                .Input(step => step.Veiculo, data => data.Veiculo)
-                .Input(step => step.Proprietario, data => data.Proprietario)
-                .Input(step => step.Condutores, data => data.Condutores)
-                .Input(step => step.Endereco, data => data.Endereco)
-                .Input(step => step.Cobertura, data => data.Cobertura)
-                .Input(step => step.ValorApolice, data => data.ValorApolice)
-                .Output(data => data.Apolice, step => step.Apolice)
-                .Output(data => data.ApoliceId, step => step.ApoliceId);
+                .Output(data => data.ValorApolice, step => step.ValorApolice);
     }
 }
 
